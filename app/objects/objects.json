@@ -1,0 +1,41 @@
+[
+    {
+        "shader_name": "complex", 
+        "count": 4, 
+        "name": "square", 
+        "vertices": [
+            1.0, 
+            1.0, 
+            0.0, 
+            -1.0, 
+            1.0, 
+            0.0, 
+            1.0, 
+            -1.0, 
+            0.0, 
+            -1.0, 
+            -1.0, 
+            0.0
+        ], 
+        "mode": "TRIANGLE_STRIP", 
+        "size": 3
+    }, 
+    {
+        "shader_name": "simple", 
+        "count": 3, 
+        "name": "triangle", 
+        "vertices": [
+            0.0, 
+            1.0, 
+            0.0, 
+            -1.0, 
+            -1.0, 
+            0.0, 
+            1.0, 
+            -1.0, 
+            0.0
+        ], 
+        "mode": "TRIANGLES", 
+        "size": 3
+    }
+]
