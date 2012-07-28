@@ -34,6 +34,7 @@ In Progress - Built for [photoworld_web](https://github.com/baguetteapps/photowo
 3. ...
 4. Finally, in your app, add this line:
 ```JS
+	var my_options = { baseURL: "/path_to_shaders_and_objects_folder" };
 	RendererBB.ready(my_renderer_holder, my_options, my_callback);
 ```
 Where my_renderer_holder is where your renderer will be stored; my_options is parameters you wish to pass to the renderer (like the baseURL to your shaders and objects folder, etc); my_callback is a function to be executed once the renderer is ready.
