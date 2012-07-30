@@ -66,7 +66,7 @@
 			app.renderer.view.render();
 		};
 
-		// Build page one once the renderer is ready
+		// Render all objects once the renderer is ready
 		RendererBB.ready(app, { baseURL: config.url + "/app" }, renderObjects);
 	};
 
