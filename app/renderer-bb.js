@@ -119,7 +119,6 @@
 							// Get attribute location
 							locations[name] = gl.getAttribLocation(program, name);
 						}
-						gl.enableVertexAttribArray(locations[name]);
 					}
 					else {
 						// Uniform
@@ -261,8 +260,10 @@
 
 			// Draw arrays
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.get("buffer"));
+			gl.enableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
 			gl.vertexAttribPointer(this.get("shader").get("locations")["aVertexPosition"], this.get("size"), gl.FLOAT, false, 0, 0);
 			gl.drawArrays(this.get("mode"), 0, this.get("count"));
+			gl.disableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
 		}
 	});
 
