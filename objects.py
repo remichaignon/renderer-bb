@@ -32,7 +32,7 @@ for fname in glob.glob(os.path.join(path, "*.object")):
     current.close()
 
     fname = fname[fname.rfind("/") + 1:fname.rfind(".")]
-    print "> Current shader is: " + fname
+    print "> Current object is: " + fname
     current_dict["name"] = fname
 
     object_dict.append(current_dict)

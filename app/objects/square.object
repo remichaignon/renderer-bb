@@ -1,12 +1,14 @@
 {
-	"shader_name": "complex",
-	"size": 3,
-	"count": 4,
+	"shader_name": "simple",
 	"mode": "TRIANGLE_STRIP",
-	"vertices": [
-		1.0, 1.0, 0.0,
-		-1.0, 1.0, 0.0,
-		1.0, -1.0, 0.0,
-		-1.0, -1.0, 0.0
-	]
+	"vertices": {
+		"size": 3,
+		"count": 4,
+		"buffer": [
+			 1.0,  1.0, 0.0,
+			-1.0,  1.0, 0.0,
+			 1.0, -1.0, 0.0,
+			-1.0, -1.0, 0.0
+		]
+	}
 }

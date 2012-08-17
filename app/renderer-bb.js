@@ -216,32 +216,62 @@
 			name: null, // Required
 			shader: null, // Optional
 			values: null, // Optional
-			buffer: null, // Optional
-			size: null, // Optional
-			count: null // Optional
+			arrayBuffer: null, // Optional
+			elementArrayBuffer: null, // Optional
+			noRender: false // Optional
 		},
 		// Initialize with parameters
 		initialize: function(args, options) {
 			var renderer = options.collection.renderer;
 			var gl = renderer.view.gl;
 
-			// Create and build buffer
-			this.set("buffer", gl.createBuffer());
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.get("buffer"));
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("vertices")), gl.STATIC_DRAW);
-			this.unset("vertices");
+			// Create and build array buffer
+			if (_.isObject(this.get("vertices")) &&
+				_.isArray(this.get("vertices").buffer) &&
+				_.isFinite(this.get("vertices").size) &&
+				_.isFinite(this.get("vertices").count)) {
+
+				var arrayBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, arrayBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("vertices").buffer), gl.STATIC_DRAW);
+				arrayBuffer.size = this.get("vertices").size;
+				arrayBuffer.count = this.get("vertices").count;
+
+				this.set("arrayBuffer", arrayBuffer);
+				this.unset("vertices");
+			}
+			else {
+				console.log("No valid vertices for this object '" + this.get("name") + "'.");
+				this.destroy();
+				return;
+			}
+
+			// Create and build element array buffer (if necessary)
+			if (_.isObject(this.get("indices")) &&
+				_.isArray(this.get("indices").buffer) &&
+				_.isFinite(this.get("indices").size) &&
+				_.isFinite(this.get("indices").count)) {
+
+				var elementArrayBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elementArrayBuffer);
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.get("indices").buffer), gl.STATIC_DRAW);
+				elementArrayBuffer.size = this.get("indices").size;
+				elementArrayBuffer.count = this.get("indices").count;
+
+				this.set("elementArrayBuffer", elementArrayBuffer);
+				this.unset("indices");
+			}
 
 			// Set drawing mode from string
-			var glMode = gl.LINES;
 			switch (this.get("mode")) {
-				case "LINE_LOOP": glMode = gl.LINE_LOOP; break;
-				case "LINE_STRIP": glMode = gl.LINE_STRIP; break;
-				case "POINTS": glMode = gl.POINTS; break;
-				case "TRIANGLES": glMode = gl.TRIANGLES; break;
-				case "TRIANGLE_FAN": glMode = gl.TRIANGLE_FAN; break;
-				case "TRIANGLE_STRIP": glMode = gl.TRIANGLE_STRIP; break;
+				case "LINES": this.set("mode", gl.LINES); break;
+				case "LINE_LOOP": this.set("mode", gl.LINE_LOOP); break;
+				case "LINE_STRIP": this.set("mode", gl.LINE_STRIP); break;
+				case "POINTS": this.set("mode", gl.POINTS); break;
+				case "TRIANGLE_FAN": this.set("mode", gl.TRIANGLE_FAN); break;
+				case "TRIANGLE_STRIP": this.set("mode", gl.TRIANGLE_STRIP); break;
+				default: this.set("mode", gl.TRIANGLES); break;
 			}
-			this.set("mode", glMode);
 
 			// Retrieve shader
 			this.set("shader", renderer.get("shaders").where({ name: this.get("shader_name") })[0]);
@@ -251,19 +281,29 @@
 			this.set("values",  $.extend(true, {}, this.get("shader").get("locations")));
 		},
 		render: function(gl) {
-			this.get("shader").use(gl);
+			if (!this.get("noRender")) {
+				this.get("shader").use(gl);
 
-			// HACK
-			// Set uniforms
-			gl.uniformMatrix4fv(this.get("shader").get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
-			gl.uniformMatrix4fv(this.get("shader").get("locations")["uMVMatrix"], false, this.get("values")["uMVMatrix"]);
+				// HACK
+				// Set uniforms
+				gl.uniformMatrix4fv(this.get("shader").get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
+				gl.uniformMatrix4fv(this.get("shader").get("locations")["uMVMatrix"], false, this.get("values")["uMVMatrix"]);
 
-			// Draw arrays
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.get("buffer"));
-			gl.enableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
-			gl.vertexAttribPointer(this.get("shader").get("locations")["aVertexPosition"], this.get("size"), gl.FLOAT, false, 0, 0);
-			gl.drawArrays(this.get("mode"), 0, this.get("count"));
-			gl.disableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
+				// Draw arrays
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.get("arrayBuffer"));
+				gl.enableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
+				gl.vertexAttribPointer(this.get("shader").get("locations")["aVertexPosition"], this.get("arrayBuffer").size, gl.FLOAT, false, 0, 0);
+
+				if (_.isNull(this.get("elementArrayBuffer"))) {
+					gl.drawArrays(this.get("mode"), 0, this.get("arrayBuffer").count);
+				}
+				else {
+					gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.get("elementArrayBuffer"));
+					gl.drawElements(this.get("mode"), this.get("elementArrayBuffer").count, gl.UNSIGNED_SHORT, 0);
+				}
+
+				gl.disableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
+			}
 		}
 	});
 

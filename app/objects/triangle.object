@@ -1,11 +1,12 @@
 {
 	"shader_name": "simple",
-	"size": 3,
-	"count": 3,
-	"mode": "TRIANGLES",
-	"vertices": [
-		0.0, 1.0, 0.0,
-		-1.0, -1.0, 0.0,
-		1.0, -1.0, 0.0
-	]
+	"vertices": {
+		"size": 3,
+		"count": 3,
+		"buffer": [
+			 0.0,  1.0, 0.0,
+			-1.0, -1.0, 0.0,
+			 1.0, -1.0, 0.0
+		]
+	}
 }

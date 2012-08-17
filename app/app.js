@@ -43,34 +43,55 @@
 			// Get objects
 			var triangle = app.renderer.get("objects").where({ name: "triangle" })[0];
 			var square = app.renderer.get("objects").where({ name: "square" })[0];
+			var pyramid = app.renderer.get("objects").where({ name: "pyramid" })[0];
+			var cube = app.renderer.get("objects").where({ name: "cube" })[0];
 
-			// Triangle's ModelView matrix
-			var values = triangle.get("values");
-			var mvMatrix = mat4.create();
-
-			// Square's ModelView matrix
-			values = square.get("values");
-			var mvMatrix2 = mat4.create();
+			// ModelView matrices
+			var triangleMVMatrix = mat4.create();
+			var squareMVMatrix = mat4.create();
+			var pyramidMVMatrix = mat4.create();
+			var cubeMVMatrix = mat4.create();
 
 			var rotation = 0;
+			var triangleValue, squareValue, pyramidValue, cubeValue;
 
 			setInterval(
 				function() {
-					mat4.identity(mvMatrix);
-					mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-					mat4.rotate(mvMatrix, rotation * Math.PI / 180, [1, 0, 0]);
-					values = triangle.get("values");
-					values["uPMatrix"] = pMatrix;
-					values["uMVMatrix"] = mvMatrix;
-					triangle.set("values", values);
+					mat4.identity(triangleMVMatrix);
+					mat4.translate(triangleMVMatrix, [-1.5, 1.5, -7.0]);
+					mat4.rotate(triangleMVMatrix, rotation * Math.PI / 180, [1, 0, 0]);
+					triangleValue = triangle.get("values");
+					triangleValue["uPMatrix"] = pMatrix;
+					triangleValue["uMVMatrix"] = triangleMVMatrix;
+					triangle.set("values", triangleValue);
+					//triangle.set("noRender", true);
 
-					mat4.identity(mvMatrix2);
-					mat4.translate(mvMatrix2, [1.5, 0.0, -7.0]);
-					mat4.rotate(mvMatrix2, rotation * Math.PI / 180, [0, 1, 0]);
-					values2 = square.get("values");
-					values2["uPMatrix"] = pMatrix;
-					values2["uMVMatrix"] = mvMatrix2;
-					square.set("values", values2);
+					mat4.identity(squareMVMatrix);
+					mat4.translate(squareMVMatrix, [1.5, 1.5, -7.0]);
+					mat4.rotate(squareMVMatrix, rotation * Math.PI / 180, [0, 1, 0]);
+					squareValue = square.get("values");
+					squareValue["uPMatrix"] = pMatrix;
+					squareValue["uMVMatrix"] = squareMVMatrix;
+					square.set("values", squareValue);
+					//square.set("noRender", true);
+
+					mat4.identity(pyramidMVMatrix);
+					mat4.translate(pyramidMVMatrix, [-1.5, -1.5, -7.0]);
+					mat4.rotate(pyramidMVMatrix, rotation * Math.PI / 180, [1, 1, 0]);
+					pyramidValue = pyramid.get("values");
+					pyramidValue["uPMatrix"] = pMatrix;
+					pyramidValue["uMVMatrix"] = pyramidMVMatrix;
+					pyramid.set("values", pyramidValue);
+					//pyramid.set("noRender", true);
+
+					mat4.identity(cubeMVMatrix);
+					mat4.translate(cubeMVMatrix, [1.5, -1.5, -7.0]);
+					mat4.rotate(cubeMVMatrix, rotation * Math.PI / 180, [0, 0, 1]);
+					cubeValue = cube.get("values");
+					cubeValue["uPMatrix"] = pMatrix;
+					cubeValue["uMVMatrix"] = cubeMVMatrix;
+					cube.set("values", cubeValue);
+					//cube.set("noRender", true);
 
 					// Render all and update angle
 					app.renderer.view.render();
