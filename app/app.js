@@ -97,7 +97,7 @@
 					app.renderer.view.render();
 					rotation++;
 				},
-				10
+				1000 / 60
 			);
 		};
 

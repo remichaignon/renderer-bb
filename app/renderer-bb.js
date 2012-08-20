@@ -228,21 +228,21 @@
 
 			// Set up all the buffers
 			var buffers = {};
-			var currentBuffer = null;
 
 			// Create and build vertices array buffer
-			if (_.isObject(this.get("vertices")) &&
-				_.isArray(this.get("vertices").buffer) &&
-				_.isFinite(this.get("vertices").size) &&
-				_.isFinite(this.get("vertices").count)) {
+			var vertices = this.get("vertices");
+			if (_.isObject(vertices) &&
+				_.isArray(vertices.buffer) &&
+				_.isFinite(vertices.size) &&
+				_.isFinite(vertices.count)) {
 
-				currentBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
-				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("vertices").buffer), gl.STATIC_DRAW);
-				currentBuffer.size = this.get("vertices").size;
-				currentBuffer.count = this.get("vertices").count;
+				var verticesBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices.buffer), gl.STATIC_DRAW);
+				verticesBuffer.size = vertices.size;
+				verticesBuffer.count = vertices.count;
 
-				buffers["vertices"] = currentBuffer;
+				buffers["vertices"] = verticesBuffer;
 				this.unset("vertices");
 			}
 			else {
@@ -252,50 +252,53 @@
 			}
 
 			// Create and build indices element array buffer (if necessary)
-			if (_.isObject(this.get("indices")) &&
-				_.isArray(this.get("indices").buffer) &&
-				_.isFinite(this.get("indices").size) &&
-				_.isFinite(this.get("indices").count)) {
+			var indices = this.get("indices");
+			if (_.isObject(indices) &&
+				_.isArray(indices.buffer) &&
+				_.isFinite(indices.size) &&
+				_.isFinite(indices.count)) {
 
-				currentBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, currentBuffer);
-				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.get("indices").buffer), gl.STATIC_DRAW);
-				currentBuffer.size = this.get("indices").size;
-				currentBuffer.count = this.get("indices").count;
+				var indicesBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices.buffer), gl.STATIC_DRAW);
+				indicesBuffer.size = indices.size;
+				indicesBuffer.count = indices.count;
 
-				buffers["indices"] = currentBuffer;
+				buffers["indices"] = indicesBuffer;
 				this.unset("indices");
 			}
 
 			// Create and build colors array buffer (if necessary)
-			if (_.isObject(this.get("colors")) &&
-				_.isArray(this.get("colors").buffer) &&
-				_.isFinite(this.get("colors").size) &&
-				_.isFinite(this.get("colors").count)) {
+			var colors = this.get("colors");
+			if (_.isObject(colors) &&
+				_.isArray(colors.buffer) &&
+				_.isFinite(colors.size) &&
+				_.isFinite(colors.count)) {
 
-				currentBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
-				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("colors").buffer), gl.STATIC_DRAW);
-				currentBuffer.size = this.get("colors").size;
-				currentBuffer.count = this.get("colors").count;
+				var colorsBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors.buffer), gl.STATIC_DRAW);
+				colorsBuffer.size = colors.size;
+				colorsBuffer.count = colors.count;
 
-				buffers["colors"] = currentBuffer;
+				buffers["colors"] = colorsBuffer;
 				this.unset("colors");
 			}
 
 			// Create and build texture coordinates array buffer (if necessary)
-			if (_.isObject(this.get("texcoords")) &&
-				_.isArray(this.get("texcoords").buffer) &&
-				_.isFinite(this.get("texcoords").size) &&
-				_.isFinite(this.get("texcoords").count)) {
+			var texcoords = this.get("texcoords");
+			if (_.isObject(texcoords) &&
+				_.isArray(texcoords.buffer) &&
+				_.isFinite(texcoords.size) &&
+				_.isFinite(texcoords.count)) {
 
-				currentBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
-				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("texcoords").buffer), gl.STATIC_DRAW);
-				currentBuffer.size = this.get("texcoords").size;
-				currentBuffer.count = this.get("texcoords").count;
+				var texcoordsBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, texcoordsBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords.buffer), gl.STATIC_DRAW);
+				texcoordsBuffer.size = texcoords.size;
+				texcoordsBuffer.count = texcoords.count;
 
-				buffers["texcoords"] = currentBuffer;
+				buffers["texcoords"] = texcoordsBuffer;
 				this.unset("texcoords");
 			}
 
@@ -322,24 +325,23 @@
 		},
 		render: function(gl) {
 			if (!this.get("noRender") && !_.isNull(this.get("buffers"))) {
-				this.get("shader").use(gl);
-
-				// Set up WebGL
+				// Set up rendering
 				var setUp = this.get("setUp");
 				if (_.isFunction(setUp)) {
 					setUp(gl);
 				}
 
-				// HACK
-				// Set uniforms
-				gl.uniformMatrix4fv(this.get("shader").get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
-				gl.uniformMatrix4fv(this.get("shader").get("locations")["uMVMatrix"], false, this.get("values")["uMVMatrix"]);
-
-				// Shader
+				// Get shader and use it
 				var shader = this.get("shader");
+				shader.use(gl);
 
 				// Buffers
 				var buffers = this.get("buffers");
+
+				// HACK
+				// Set uniforms
+				gl.uniformMatrix4fv(shader.get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
+				gl.uniformMatrix4fv(shader.get("locations")["uMVMatrix"], false, this.get("values")["uMVMatrix"]);
 
 				// Vertices
 				if (!_.isUndefined(buffers["vertices"])) {
@@ -358,7 +360,8 @@
 				// Texture Coordinates
 				if (!_.isUndefined(buffers["texcoords"])) {
 					gl.bindBuffer(gl.ARRAY_BUFFER, buffers["texcoords"]);
-					gl.vertexAttribPointer(shader.get("locations")["aTexCoords"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
+					gl.enableVertexAttribArray(shader.get("locations")["aTexCoord"]);
+					gl.vertexAttribPointer(shader.get("locations")["aTexCoord"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
 				}
 
 				// Indices
@@ -370,13 +373,14 @@
 					gl.drawArrays(this.get("mode"), 0, buffers["vertices"].count);
 				}
 
-				// Tear down WebGL
+				gl.disableVertexAttribArray(shader.get("locations")["aVertexPosition"]);
+				gl.disableVertexAttribArray(shader.get("locations")["aVertexColor"]);
+
+				// Tear down rendering
 				var tearDown = this.get("tearDown");
 				if (_.isFunction(tearDown)) {
 					tearDown(gl);
 				}
-//				gl.disableVertexAttribArray(shader.get("locations")["aVertexPosition"]);
-//				gl.disableVertexAttribArray(shader.get("locations")["aVertexColor"]);
 			}
 		}
 	});
