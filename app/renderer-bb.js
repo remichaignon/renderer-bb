@@ -30,7 +30,7 @@
 	RendererBB.ShaderModel = Backbone.Model.extend({
 		defaults: {
 			name: null, // Required
-			locations: null, // Optional
+			locations: null,
 			program: null,
 			bound: false
 		},
@@ -214,18 +214,21 @@
 	RendererBB.ObjectModel = Backbone.Model.extend({
 		defaults: {
 			name: null, // Required
-			shader: null, // Optional
-			values: null, // Optional
-			arrayBuffer: null, // Optional
-			elementArrayBuffer: null, // Optional
-			noRender: false // Optional
+			shader: null,
+			values: null,
+			buffers: null,
+			arrayBuffer: null,
+			elementArrayBuffer: null,
+			setUp: null,
+			tearDown: null,
+			noRender: false
 		},
 		// Initialize with parameters
 		initialize: function(args, options) {
 			var renderer = options.collection.renderer;
 			var gl = renderer.view.gl;
 
-			// Create and build array buffer
+			// Create and build vertices array buffer
 			if (_.isObject(this.get("vertices")) &&
 				_.isArray(this.get("vertices").buffer) &&
 				_.isFinite(this.get("vertices").size) &&
@@ -246,7 +249,7 @@
 				return;
 			}
 
-			// Create and build element array buffer (if necessary)
+			// Create and build indices element array buffer (if necessary)
 			if (_.isObject(this.get("indices")) &&
 				_.isArray(this.get("indices").buffer) &&
 				_.isFinite(this.get("indices").size) &&
@@ -261,6 +264,9 @@
 				this.set("elementArrayBuffer", elementArrayBuffer);
 				this.unset("indices");
 			}
+
+			// Create and build colors array buffer (if necessary)
+			// Create and build texture coordinates array buffer (if necessary)
 
 			// Set drawing mode from string
 			switch (this.get("mode")) {
@@ -284,6 +290,12 @@
 			if (!this.get("noRender")) {
 				this.get("shader").use(gl);
 
+				// Set up WebGL
+				var setUp = this.get("setUp");
+				if (_.isFunction(setUp)) {
+					setUp(gl);
+				}
+
 				// HACK
 				// Set uniforms
 				gl.uniformMatrix4fv(this.get("shader").get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
@@ -303,6 +315,12 @@
 				}
 
 				gl.disableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
+
+				// Tear down WebGL
+				var tearDown = this.get("tearDown");
+				if (_.isFunction(tearDown)) {
+					tearDown(gl);
+				}
 			}
 		}
 	});
@@ -356,7 +374,9 @@
 	RendererBB.RendererModel = Backbone.Model.extend({
 		defaults: {
 			shaders: null,
-			objects: null
+			objects: null,
+			setUp: null, // Optional
+			tearDown: null // Optional
 		},
 		initialize: function(args, options) {}
 	});
@@ -406,6 +426,12 @@
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+			// Set up WebGL
+			var setUp = this.model.get("setUp");
+			if (_.isFunction(setUp)) {
+				setUp(gl);
+			}
+
 			// Loop through the objects
 			_.each(
 				this.model.get("objects").models,
@@ -413,6 +439,12 @@
 					object.render(gl);
 				}
 			);
+
+			// Tear down WebGL
+			var tearDown = this.model.get("tearDown");
+			if (_.isFunction(tearDown)) {
+				tearDown(gl);
+			}
 		}
 	});
 
