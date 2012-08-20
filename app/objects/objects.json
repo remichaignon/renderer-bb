@@ -153,7 +153,29 @@
         }
     }, 
     {
-        "shader_name": "simple", 
+        "shader_name": "color", 
+        "colors": {
+            "count": 4, 
+            "buffer": [
+                1.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                1.0, 
+                1.0, 
+                1.0, 
+                0.0, 
+                1.0
+            ], 
+            "size": 4
+        }, 
         "mode": "TRIANGLE_STRIP", 
         "name": "square", 
         "vertices": {

@@ -217,8 +217,6 @@
 			shader: null,
 			values: null,
 			buffers: null,
-			arrayBuffer: null,
-			elementArrayBuffer: null,
 			setUp: null,
 			tearDown: null,
 			noRender: false
@@ -228,23 +226,27 @@
 			var renderer = options.collection.renderer;
 			var gl = renderer.view.gl;
 
+			// Set up all the buffers
+			var buffers = {};
+			var currentBuffer = null;
+
 			// Create and build vertices array buffer
 			if (_.isObject(this.get("vertices")) &&
 				_.isArray(this.get("vertices").buffer) &&
 				_.isFinite(this.get("vertices").size) &&
 				_.isFinite(this.get("vertices").count)) {
 
-				var arrayBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, arrayBuffer);
+				currentBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
 				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("vertices").buffer), gl.STATIC_DRAW);
-				arrayBuffer.size = this.get("vertices").size;
-				arrayBuffer.count = this.get("vertices").count;
+				currentBuffer.size = this.get("vertices").size;
+				currentBuffer.count = this.get("vertices").count;
 
-				this.set("arrayBuffer", arrayBuffer);
+				buffers["vertices"] = currentBuffer;
 				this.unset("vertices");
 			}
 			else {
-				console.log("No valid vertices for this object '" + this.get("name") + "'.");
+				console.log("No valid vertices for this object '" + this.get("name") + "'; Object will be ignored.");
 				this.destroy();
 				return;
 			}
@@ -255,18 +257,50 @@
 				_.isFinite(this.get("indices").size) &&
 				_.isFinite(this.get("indices").count)) {
 
-				var elementArrayBuffer = gl.createBuffer();
-				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elementArrayBuffer);
+				currentBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, currentBuffer);
 				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.get("indices").buffer), gl.STATIC_DRAW);
-				elementArrayBuffer.size = this.get("indices").size;
-				elementArrayBuffer.count = this.get("indices").count;
+				currentBuffer.size = this.get("indices").size;
+				currentBuffer.count = this.get("indices").count;
 
-				this.set("elementArrayBuffer", elementArrayBuffer);
+				buffers["indices"] = currentBuffer;
 				this.unset("indices");
 			}
 
 			// Create and build colors array buffer (if necessary)
+			if (_.isObject(this.get("colors")) &&
+				_.isArray(this.get("colors").buffer) &&
+				_.isFinite(this.get("colors").size) &&
+				_.isFinite(this.get("colors").count)) {
+
+				currentBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("colors").buffer), gl.STATIC_DRAW);
+				currentBuffer.size = this.get("colors").size;
+				currentBuffer.count = this.get("colors").count;
+
+				buffers["colors"] = currentBuffer;
+				this.unset("colors");
+			}
+
 			// Create and build texture coordinates array buffer (if necessary)
+			if (_.isObject(this.get("texcoords")) &&
+				_.isArray(this.get("texcoords").buffer) &&
+				_.isFinite(this.get("texcoords").size) &&
+				_.isFinite(this.get("texcoords").count)) {
+
+				currentBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, currentBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.get("texcoords").buffer), gl.STATIC_DRAW);
+				currentBuffer.size = this.get("texcoords").size;
+				currentBuffer.count = this.get("texcoords").count;
+
+				buffers["texcoords"] = currentBuffer;
+				this.unset("texcoords");
+			}
+
+			// Store the buffers
+			this.set("buffers", buffers);
 
 			// Set drawing mode from string
 			switch (this.get("mode")) {
@@ -287,7 +321,7 @@
 			this.set("values",  $.extend(true, {}, this.get("shader").get("locations")));
 		},
 		render: function(gl) {
-			if (!this.get("noRender")) {
+			if (!this.get("noRender") && !_.isNull(this.get("buffers"))) {
 				this.get("shader").use(gl);
 
 				// Set up WebGL
@@ -301,26 +335,48 @@
 				gl.uniformMatrix4fv(this.get("shader").get("locations")["uPMatrix"], false, this.get("values")["uPMatrix"]);
 				gl.uniformMatrix4fv(this.get("shader").get("locations")["uMVMatrix"], false, this.get("values")["uMVMatrix"]);
 
-				// Draw arrays
-				gl.bindBuffer(gl.ARRAY_BUFFER, this.get("arrayBuffer"));
-				gl.enableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
-				gl.vertexAttribPointer(this.get("shader").get("locations")["aVertexPosition"], this.get("arrayBuffer").size, gl.FLOAT, false, 0, 0);
+				// Shader
+				var shader = this.get("shader");
 
-				if (_.isNull(this.get("elementArrayBuffer"))) {
-					gl.drawArrays(this.get("mode"), 0, this.get("arrayBuffer").count);
+				// Buffers
+				var buffers = this.get("buffers");
+
+				// Vertices
+				if (!_.isUndefined(buffers["vertices"])) {
+					gl.bindBuffer(gl.ARRAY_BUFFER, buffers["vertices"]);
+					gl.enableVertexAttribArray(shader.get("locations")["aVertexPosition"]);
+					gl.vertexAttribPointer(shader.get("locations")["aVertexPosition"], buffers["vertices"].size, gl.FLOAT, false, 0, 0);
+				}
+
+				// Colors
+				if (!_.isUndefined(buffers["colors"])) {
+					gl.bindBuffer(gl.ARRAY_BUFFER, buffers["colors"]);
+					gl.enableVertexAttribArray(shader.get("locations")["aVertexColor"]);
+					gl.vertexAttribPointer(shader.get("locations")["aVertexColor"], buffers["colors"].size, gl.FLOAT, false, 0, 0);
+				}
+
+				// Texture Coordinates
+				if (!_.isUndefined(buffers["texcoords"])) {
+					gl.bindBuffer(gl.ARRAY_BUFFER, buffers["texcoords"]);
+					gl.vertexAttribPointer(shader.get("locations")["aTexCoords"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
+				}
+
+				// Indices
+				if (!_.isUndefined(buffers["indices"])) {
+					gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers["indices"]);
+					gl.drawElements(this.get("mode"), buffers["indices"].count, gl.UNSIGNED_SHORT, 0);
 				}
 				else {
-					gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.get("elementArrayBuffer"));
-					gl.drawElements(this.get("mode"), this.get("elementArrayBuffer").count, gl.UNSIGNED_SHORT, 0);
+					gl.drawArrays(this.get("mode"), 0, buffers["vertices"].count);
 				}
-
-				gl.disableVertexAttribArray(this.get("shader").get("locations")["aVertexPosition"]);
 
 				// Tear down WebGL
 				var tearDown = this.get("tearDown");
 				if (_.isFunction(tearDown)) {
 					tearDown(gl);
 				}
+//				gl.disableVertexAttribArray(shader.get("locations")["aVertexPosition"]);
+//				gl.disableVertexAttribArray(shader.get("locations")["aVertexColor"]);
 			}
 		}
 	});
