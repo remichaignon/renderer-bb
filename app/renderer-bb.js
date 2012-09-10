@@ -279,6 +279,21 @@
 
 				buffers["texcoords"] = texcoordsBuffer;
 				this.unset("texcoords");
+
+				// HACK
+				// Set texture
+				var texture = gl.createTexture();
+				texture.image = new Image();
+				texture.image.onload = function () {
+					gl.bindTexture(gl.TEXTURE_2D, texture);
+					gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+					gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+					gl.bindTexture(gl.TEXTURE_2D, null);
+				};
+				texture.image.src = "../assets/img/nehe.gif";
+				buffers["texcoords"].texture = texture;
 			}
 
 			// Create and build indices element array buffer (if necessary)
@@ -321,6 +336,7 @@
 		},
 		render: function(gl) {
 			if (!this.get("noRender") && !_.isNull(this.get("buffers"))) {
+
 				// Set up rendering
 				var setUp = this.get("setUp");
 				if (_.isFunction(setUp)) {
@@ -356,8 +372,13 @@
 				// Texture Coordinates
 				if (!_.isUndefined(buffers["texcoords"])) {
 					gl.bindBuffer(gl.ARRAY_BUFFER, buffers["texcoords"]);
-					gl.enableVertexAttribArray(shader.get("locations")["aTexCoord"]);
-					gl.vertexAttribPointer(shader.get("locations")["aTexCoord"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
+					gl.enableVertexAttribArray(shader.get("locations")["aTextureCoord"]);
+					gl.vertexAttribPointer(shader.get("locations")["aTextureCoord"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
+
+					// HACK
+					gl.activeTexture(gl.TEXTURE0);
+					gl.bindTexture(gl.TEXTURE_2D, buffers["texcoords"].texture);
+					gl.uniform1i(shader.get("locations")["uSampler"], 0);
 				}
 
 				// Indices
