@@ -3,7 +3,7 @@
         "fragment": "precision mediump float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tgl_FragColor = vColor;\n}", 
         "vertex": "attribute vec3 aVertexPosition;\nattribute vec4 aVertexColor;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tgl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvColor = aVertexColor;\n}", 
         "name": "color", 
-        "locations": "{\n\t&quot;aVertexPosition&quot;: 0,\n\t&quot;aVertexColor&quot;: 1,\n\t&quot;uMVMatrix&quot;: -1,\n\t&quot;uPMatrix&quot;: -1\n}"
+        "locations": "{\n\t&quot;aVertexColor&quot;: 0,\n\t&quot;aVertexPosition&quot;: 1,\n\t&quot;uMVMatrix&quot;: -1,\n\t&quot;uPMatrix&quot;: -1\n}"
     }, 
     {
         "fragment": "void main(void) {\n\tgl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n}\n", 
