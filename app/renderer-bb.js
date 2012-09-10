@@ -169,11 +169,7 @@
 						// Decode vertex source
 						data[index].vertex = $("<div/>").html(data[index].vertex).text();
 					}
-					// Locations were returned
-					if (!_.isUndefined(data[index].locations)) {
-						// Parse and decode locations of attribs and uniforms
-						data[index].locations = $.parseJSON($("<div/>").html(data[index].locations).text());
-					}
+					// Locations doesn't need to be decoded
 				}
 			}
 
