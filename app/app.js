@@ -55,8 +55,8 @@
 			var rotation = 0;
 			var triangleValue, squareValue, pyramidValue, cubeValue;
 
-			setTimeout(
-				function() {
+//			setTimeout(
+//				function() {
 					setInterval(
 						function() {
 							mat4.identity(triangleMVMatrix);
@@ -101,9 +101,9 @@
 						},
 						1000 / 60
 					);
-				},
-				2000
-			);
+//				},
+//				2000
+//			);
 		};
 
 		// Render all objects once the renderer is ready

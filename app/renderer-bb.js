@@ -291,6 +291,7 @@
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 					gl.bindTexture(gl.TEXTURE_2D, null);
+					texture.isLoaded = true;
 				};
 				texture.image.src = "../assets/img/nehe.gif";
 				buffers["texcoords"].texture = texture;
@@ -376,9 +377,11 @@
 					gl.vertexAttribPointer(shader.get("locations")["aTextureCoord"], buffers["texcoords"].size, gl.FLOAT, false, 0, 0);
 
 					// HACK
-					gl.activeTexture(gl.TEXTURE0);
-					gl.bindTexture(gl.TEXTURE_2D, buffers["texcoords"].texture);
-					gl.uniform1i(shader.get("locations")["uSampler"], 0);
+					if (buffers["texcoords"].texture.isLoaded) {
+						gl.activeTexture(gl.TEXTURE0);
+						gl.bindTexture(gl.TEXTURE_2D, buffers["texcoords"].texture);
+						gl.uniform1i(shader.get("locations")["uSampler"], 0);
+					}
 				}
 
 				// Indices
