@@ -1,6 +1,6 @@
 {
-	"aVertexColor": 0,
-	"aVertexPosition": 1,
+	"aVertexPosition": -1,
+	"aVertexColor": -1,
 	"uMVMatrix": -1,
 	"uPMatrix": -1
 }
