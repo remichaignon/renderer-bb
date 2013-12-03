@@ -5,7 +5,7 @@ Javascript WebGL library based on Backbone.
 
 ## Status
 
-In Progress - Built for [photoworld_web](https://github.com/baguetteapps/photoworld_web).
+Not in development anymore.
 
 
 ## Dependencies
@@ -42,7 +42,7 @@ Where my_renderer_holder is where your renderer will be stored; my_options is pa
 
 ## License
 
-renderer-bb.js is released under the MIT license.
+Unlicense (public domain).
 
 
 ## Author
